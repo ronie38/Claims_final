@@ -1,0 +1,70 @@
+version: '3.8'
+services: 
+    mongodb:
+        image: "mongo" 
+        volumes:
+            - data:/data/db/ # Take care to put no space between : and / while defining volume.
+#         # environemt:
+#             # MONGO_INITDB_ROOT_USERNAME: max
+#             # - MONGO_INITDB_ROOT_USERNAME = max
+#             # - MONGO_INITDB_ROOT_PASSWORD = secret
+#             # These two options can be done. Either store in the key value pair or use '=' sign. '=' means it's single line then we
+#             # have to use '-' at the beginning.
+#         env_file:
+#             - ./env/mongo.env   
+#             # it's a single line that's why I used '-' here.
+#             # I defined everything in the separate file instead of defining environment here, and specified the path of the file here
+#             # under 'env_file' 
+
+
+#         # networks:
+#         #     -goals-net 
+
+
+#         # adding networks is optional as docker compose creates it's own network for all the the configurations that I just wrote here.
+#         # If I specify then that network will be used and not the default one.
+        
+        
+
+    backend: 
+        build: ./backend  # This will build rhe image by locating the dockerfile from the backend folder because we specified the 
+        # path for locating.If image already built then:-- image:'image-name'
+
+        # (or) longer version :--
+
+        # build:
+        #     context: ./backend
+        #     dockerfile: Dockerfile
+        #     args:
+        #       some-arg: 1                   --> if the dockerfile contains ARG.
+        # container_name: backend
+        ports: 
+            - "4000:4000"                         # 80 is the container port and 3000 is local machine port.
+#  No need for network definition as docker automatically takes the default network.
+        volumes:
+            - ./backend:/app/backend          # bind mount
+            - /app/node_modules
+        env_file:
+            - ./backend/config/config.env
+        depends_on:
+            - mongodb                   # Required because backend depends on mongodb. It will only run if mongodb runs first and mongodb 
+
+    frontend: 
+        build: ./frontend
+        ports:
+            - "7000:3000"
+        volumes:
+           
+            - ./frontend/src:/app/src
+            -  /app/node_modules
+        stdin_open: true                        # for -i flag in -it
+        tty: true                               # for -t flag in -it
+        depends_on:
+            - backend
+        
+volumes:
+    data:
+
+
+
+
